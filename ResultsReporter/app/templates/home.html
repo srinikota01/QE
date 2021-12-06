@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Home</title>
+    <style>
+        div {
+            width: 180px;
+            height: 100px;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+
+        flex {
+            display: -webkit-box;
+            display: -moz-box;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+        }
+
+        .flex-child {
+            -webkit-box-flex: 2 2 auto;
+            -moz-box-flex: 2 2 auto;
+            -webkit-flex: 2 2 auto;
+            -ms-flex: 2 2 auto;
+            flex: 2 2 auto;
+            margin: 8px;
+        }
+    </style>
+    <script src="utils.js"></script>
+</head>
+
+<body>
+    <script>
+        console.log(document.cookie);
+        let mToken = getCookie("token");
+        if(mToken == ""){
+            window.location.replace("/");
+        }
+        function logout(){
+            document.cookie = "token" +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            window.location.replace("/");
+        }
+    </script>
+    <div class="flex">
+        <a class="flex-child" href="/results_entry.html">Results Entry</a>
+        <a class="flex-child" href="/reports.html">Reports</a>
+        <button class="flex-child" onClick="logout()">Logout</a>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Reports</title>
+    <script src="utils.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+    </script>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        let mToken = getCookie("token");
+        if (mToken == "") {
+            window.location.replace("/");
+        }
+        function setTabularData(data) {
+            let temp = '';
+            data.forEach(element => {
+                let resultId = "<td>" + element.resultId + "</td>";
+                let datetime = "<td>" + element.datetime + "</td>";
+                let testcases = "<td>" + element.testcases + "</td>";
+                let failed = "<td>" + element.failed + "</td>";
+                let skipped = "<td>" + element.skipped + "</td>";
+                let passed = "<td>" + element.passed + "</td>";
+                let comments = "<td>" + element.comments + "</td>";
+                temp = temp + "<tr>" + resultId + datetime + testcases + failed + skipped + passed + comments + "</tr>";
+                console.log(temp);
+            });
+            document.getElementById('tbody').innerHTML = temp;
+        }
+        function setChartData(data, parameter) {
+            let xValues = []; // put resultId
+            let yValues = []; // put parameter percentage
+            data.forEach(element => {
+                xValues.push(element.datetime);
+                if (parameter == "passpercentage") {
+                    yValues.push(element.passpercentage);
+                } .0
+                if (parameter == "testcases") {
+                    yValues.push(element.testcases);
+                }
+                if (parameter == "passed") {
+                    yValues.push(element.passed);
+                }
+                if (parameter == "failed") {
+                    yValues.push(element.failed);
+                }
+                if (parameter == "skipped") {
+                    yValues.push(element.skipped);
+                }
+            });
+            var barColors = [
+                "rgba(0,0,255,1.0)",
+                "rgba(0,0,255,0.8)",
+                "rgba(0,0,255,0.6)",
+                "rgba(0,0,255,0.4)",
+                "rgba(0,0,255,0.2)",
+            ];
+            var myChart = new Chart("myChart", {
+                type: "bar",
+                data: {
+                    labels: xValues,
+                    datasets: [{
+                        data: yValues,
+                        label: xValues,
+                        backgroundColor: barColors,
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: "Results of " + parameter
+                    }
+                }
+            });
+
+        }
+        function setReportData(category, from_date, to_date, environment, report_type, parameter) {
+            let fetchRes = fetch("/api/results/?" + new URLSearchParams({
+                "category": category,
+                "from_date": from_date,
+                "to_date": to_date,
+                "environment": environment
+            }));
+            fetchRes.then(res =>
+                res.json()).then(d => {
+                    console.log(d)
+                    if (d.result !== 'success') {
+                        alert('Some Error Occured!');
+                    }
+                    else {
+                        if (report_type == "tabular") {
+                            setTabularData(d.data);
+                        } else {
+                            setChartData(d.data, parameter);
+                        }
+                    }
+                })
+        }
+        function generateTabularReport() {
+            let category = document.getElementById("category").value;
+            let from_date = document.getElementById("from_date").value;
+            let to_date = document.getElementById("to_date").value;
+            let environment = document.getElementById("environment").value;
+            setReportData(category, from_date, to_date, environment, "tabular", "");
+        }
+        function generateChartReport() {
+            let category = document.getElementById("category1").value;
+            let from_date = document.getElementById("from_date1").value;
+            let to_date = document.getElementById("to_date1").value;
+            let environment = document.getElementById("environment1").value;
+            let parameter = document.getElementById("parameter").value;
+            setReportData(category, from_date, to_date, environment, "chart", parameter);
+        }
+    </script>
+    <div>
+        <h1>Tabular Data of Previous reports</h1>
+        <div>
+
+            <label for="category">Category:</label>
+            <select id="category" name="category">
+                <option value="UI Automation">UI Automation</option>
+                <option value="API Automation">API Automation</option>
+                <option value="UI Security">UI Security</option>
+                <option value="API Security">API Security</option>
+                <option value="API Performance">API Performance</option>
+                <option value="UI Performance">UI Performance</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="from_date">From Date:</label>
+            <input type="datetime-local" id="from_date" name="from_date">
+
+            <label for="to_date">To Date:</label>
+            <input type="datetime-local" id="to_date" name="to_date">
+
+            <label for="environment">Environment:</label>
+            <input type="text" id="environment" name="environment">
+
+            <button onClick="generateTabularReport()">Submit</button>
+            <br><br>
+
+            <table id="tabreport">
+                <thead>
+                    <tr>
+                        <th>resultId</th>
+                        <th>datetime</th>
+                        <th>testcases</th>
+                        <th>failed</th>
+                        <th>skipped</th>
+                        <th>passed</th>
+                        <th>comments</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div>
+        <h1>Bar Chart of Previous reports</h1>
+        <div>
+            <label for="category1">Category:</label>
+            <select id="category1" name="category1">
+                <option value="UI Automation">UI Automation</option>
+                <option value="API Automation">API Automation</option>
+                <option value="UI Security">UI Security</option>
+                <option value="API Security">API Security</option>
+                <option value="API Performance">API Performance</option>
+                <option value="UI Performance">UI Performance</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="from_date1">From Date:</label>
+            <input type="datetime-local" id="from_date1" name="from_date1">
+
+            <label for="to_date1">To Date:</label>
+            <input type="datetime-local" id="to_date1" name="to_date1">
+
+            <label for="environment1">Environment:</label>
+            <input type="text" id="environment1" name="environment1">
+
+            <label for="parameter">Parameter:</label>
+            <select id="parameter" name="parameter">
+                <option value="passpercentage">pass%</option>
+                <option value="testcases">testcases</option>
+                <option value="passed">passed</option>
+                <option value="failed">failed</option>
+                <option value="skipped">skipped</option>
+            </select>
+
+            <button onClick="generateChartReport()">Submit</button>
+            <br><br>
+            <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Results Entry</title>
+    <script src="utils.js"></script>
+</head>
+
+<body>
+    <script>
+        console.log(document.cookie);
+        let mToken = getCookie("token");
+        if(mToken == ""){
+            window.location.replace("/");
+        }
+        function submitResult(){
+            let category = document.getElementById("category").value;
+            let testcases = document.getElementById("testcases").value;
+            let passed = document.getElementById("passed").value;
+            let failed = document.getElementById("failed").value;
+            let skipped = document.getElementById("skipped").value;
+            let passpercentage = document.getElementById("passpercentage").value;
+            let environment = document.getElementById("environment").value;
+            let date = document.getElementById("date").value;
+            let comments = document.getElementById("comments").value;
+
+            let result = {
+                "category": category,
+                "testcases": parseInt(testcases),
+                "passed": parseInt(passed),
+                "failed": parseInt(failed),
+                "skipped": parseInt(skipped),
+                "passpercentage": parseInt(passpercentage),
+                "environment": environment,
+                "datetime": date,
+                "comments": comments
+            }
+            
+            let options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 
+                    'application/json;charset=utf-8',
+                    'Authorization':getCookie("token")
+                },
+                body: JSON.stringify(result)
+            }
+
+            let fetchRes = fetch("/api/submit_results",options);
+            fetchRes.then(res =>
+            res.json()).then(d => {
+                console.log(d)
+                if(d.result !== 'success'){
+                    alert('Some Error Occured!');
+                }else{
+                    alert('Entered successfully!');
+                }
+            })
+        }
+    </script>
+    <h1 name="resultsform">Results Entry:</h1>
+        <br>
+        <label for="category">Category:</label>
+        <select id="category" name="category">
+            <option value="UI Automation">UI Automation</option>
+            <option value="API Automation">API Automation</option>
+            <option value="UI Security">UI Security</option>
+            <option value="API Security">API Security</option>
+            <option value="API Performance">API Performance</option>
+            <option value="UI Performance">UI Performance</option>
+            <option value="Other">Other</option>
+        </select>
+        <br><br>
+        <label for="testcases">TestCases:</label>
+        <input type="number" id="testcases" name="testcases">
+        <br><br>
+        <label for="passed">Passed:</label>
+        <input type="number" id="passed" name="passed">
+        <br><br>
+        <label for="failed">Failed:</label>
+        <input type="number" id="failed" name="failed">
+        <br><br>
+        <label for="skipped">Skipped:</label>
+        <input type="number" id="skipped" name="skipped">
+        <br><br>
+        <label for="passpercentage">Pass%:</label>
+        <input type="number" id="passpercentage" name="passpercentage">
+        <br><br>
+        <label for="environment">Environment:</label>
+        <input type="text" id="environment" name="environment">
+        <br><br>
+        <label for="date">Date:</label>
+        <input type="datetime-local" id="date" name="date">
+        <br><br>
+        <label for="comments">Comments:</label>
+        <input type="text" id="comments" name="comments">
+        <br><br>
+        <button onClick="submitResult()">Submit</button>
+</body>
+
+</html>

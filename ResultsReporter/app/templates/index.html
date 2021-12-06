@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login</title>
+    <style>
+        div {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+    </style>
+    <script src="utils.js"></script>
+</head>
+
+<body>
+    <script>
+        let mToken = getCookie("token");
+        if(mToken != ""){
+            window.location.replace("/home.html");
+        }
+        function login(){
+            let username = document.getElementById("username").value;
+            let password = document.getElementById("password").value;
+            const user = new URLSearchParams();
+            user.append("username",username);
+            user.append("password",password);
+            
+            let options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 
+                    'application/x-www-form-urlencoded'
+                },
+                body: user
+            }
+
+            let fetchRes = fetch("/api/login",options);
+            fetchRes.then(res =>
+            res.json()).then(d => {
+                console.log(d)
+                let token = "Bearer "+d.access_token;
+                if(token === 'undefined'){
+                    alert('Login failed!');
+                }else{
+                    console.log(token);
+                    setCookie("token", token+"; path=/",365);
+                    window.location.replace("/home.html");
+                }
+            })
+        }
+    </script>
+    <div>
+            <label for="username">Username:</label><br>
+            <input type="text" id ="username" name="username"><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password"><br><br>
+            <button onClick="login()">Submit</button>
+    </div>
+</body>
+
+</html>
